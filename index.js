@@ -46,7 +46,7 @@ void main() {
   color += vec3(1.0) * drawSphere(pc, light);
   color += sphere1Color * drawSphere(pc, sphere1);
   if (frameCounter < 0.5) {
-    gl_FragColor = vec4(color, 1.0);
+    gl_FragColor = 0.01 * vec4(color, 1.0);
   } else {
     vec2 uv = vec2(vUV.x, vUV.y);
     vec2 dx = vec2(1.0 / res.x, 0.0);
@@ -58,11 +58,33 @@ void main() {
     vec4 current = texture2D(tex, uv);
     float water = current.x;
     float velocity = current.y;
-    float avg = (w1 + w2 + w3 + w4) * 0.25;
-    velocity = (velocity + avg) * 0.5;
-    //float newWater = (water + avg) * 0.5 + velocity * 0.25;
-    float newWater = water + velocity;
+
+    float outside = 0.0;
+
+    int count = 4;
+
+    if ((uv + dx).x >= 1.0) {
+      w1 = outside;
+      count -= 1;
+    }
+    if ((uv - dx).x < 0.0) {
+      w2 = outside;
+      count -= 1;
+    }
+    if ((uv + dy).y >= 1.0) {
+      w3 = outside;
+      count -= 1;
+    }
+    if ((uv - dy).y < 0.0) {
+      w4 = outside;
+      count -= 1;
+    }
+
+    float avg = (w1 + w2 + w3 + w4) / float(count);
+    //velocity = (velocity + avg) * 0.5;
+    float newWater = water + velocity + 0.5 * avg;
     velocity = newWater - water;
+    //velocity *= 0.19;
     gl_FragColor = vec4(vec3(newWater, velocity, 0.0), 1.0);
   }
 }`;
@@ -100,7 +122,7 @@ const state = {};
 
 function getRT(width, height) {
   const r1 = {};
-  r1.rt = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+  r1.rt = new THREE.WebGLRenderTarget(width, height, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
       format: THREE.RGBAFormat,
@@ -130,7 +152,7 @@ init();
 animate();
 function init() {
     const width = window.innerWidth;
-    const height = window.innerHeight;
+    const height = width; // window.innerHeight;
     container = document.getElementById('container');
     camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     scene = new THREE.Scene();
@@ -159,10 +181,10 @@ function init() {
     container.appendChild(renderer.domElement);
     onWindowResize();
     window.addEventListener('resize', onWindowResize, false);
-    
+    renderer.setSize(width, height);
 }
 function onWindowResize() {
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    //renderer.setSize(window.innerWidth, window.innerHeight);
 }
 function animate() {
     uniforms["time"].value = performance.now() / 1000;
