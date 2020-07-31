@@ -40,13 +40,13 @@ void main() {
   vec2 p = vUV;
   vec2 pc = (p - 0.5) * 2.0;
   vec3 light = vec3(-0.8, 0.85, 0.05);
-  vec3 sphere1 = vec3(0.5, 0.5, 0.1);
+  vec3 sphere1 = vec3(0.5, 0.5, 0.5);
   vec3 sphere1Color = vec3(1.0, 0.0, 0.0);
   vec3 color = vec3(0.0);
   color += vec3(1.0) * drawSphere(pc, light);
   color += sphere1Color * drawSphere(pc, sphere1);
   if (frameCounter < 0.5) {
-    gl_FragColor = 0.01 * vec4(color, 1.0);
+    gl_FragColor = vec4(color.x > 0.0 ? 2.0 : 0.0, 0.0, 0.0, 1.0);
   } else {
     vec2 uv = vec2(vUV.x, vUV.y);
     vec2 dx = vec2(1.0 / res.x, 0.0);
@@ -80,12 +80,12 @@ void main() {
       count -= 1;
     }
 
-    float avg = (w1 + w2 + w3 + w4) / float(count);
+    float avg = (w1 + w2 + w3 + w4 - float(count) * water); // / float(count);
     //velocity = (velocity + avg) * 0.5;
     float newWater = water + velocity + 0.5 * avg;
-    velocity = newWater - water;
+    float newVelocity = newWater - water;
     //velocity *= 0.19;
-    gl_FragColor = vec4(vec3(newWater, velocity, 0.0), 1.0);
+    gl_FragColor = vec4(vec3(newWater, newVelocity, 0.0), 1.0);
   }
 }`;
 
