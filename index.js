@@ -167,15 +167,20 @@ void main() {
 
   for (int i = 0; i < 10; i++) {
     float angle = float(i) / 10.0 * 2.0 * 3.1415926;
-    float rr = 0.1;
+    float rr = 0.2;
     float x = rr * cos(angle);
     float y = rr * sin(angle);
-    color += vec3(1.0, 0.0, float(i) / 10.0) * drawSphere(pc, vec3(x, y, 0.1));
+    color += vec3(1.0, 0.0, float(i) / 10.0) * drawSphere(pc, vec3(x, y, 0.05));
   }
 
   if (frameCounter < 0.5) {
     gl_FragColor = vec4(color.x > 0.0 ? 2.0 : 0.0, 0.0, color.z > 0.0 ? 2.0 : 0.0, 0.0);
   } else {
+
+    if (color.x > 0.0) {
+      discard;
+    }
+
     //vec2 uv = vec2(vUV.x, vUV.y);
     vec2 uv = gl_FragCoord.xy / res.xy;
     vec2 dx = vec2(1.0 / res.x, 0.0);
@@ -301,7 +306,8 @@ void main() {
   float s = pow(2.0 * texc.y, 0.5);
   s = 1.0;
   //gl_FragColor = vec4(hsv2rgb(vec3(texc.z, 1.0, s)), 1.0);
-  gl_FragColor = vec4(vec3(texc.x, 4.0 * (texc.y + texc.w), texc.z), 1.0);
+  //gl_FragColor = vec4(2.0 * vec3(texc.x, 4.0 * (texc.y + texc.w), texc.z), 1.0);
+  gl_FragColor = vec4(vec3(10.0 * texc.x), 1.0);
   /* gl_FragColor =
     texc.y > 0.0 ?
       vec4(hsv2rgb(vec3(texc.z, 1.0, 1.0)), 1.0) : 
